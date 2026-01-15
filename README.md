@@ -50,6 +50,32 @@ The workflow requires an OpenAI connection to function.
 * Enter your OpenAI API Key.
 * Ensure the "Model" is set to gpt-4o-mini (or similar) in the node settings.
 
+## Exploitation Guide
+Follow these steps exactly to reproduce the vulnerability.
 
+### Step 1: Prepare the Target
+* In the n8n editor, locate the "On form submission" node (the trigger).
+* Click on it to open the parameters.
+* Look for the Test URL (it should look like http://localhost:5678/webhook-test/...).
+* Copy this URL.
+* Click the "Execute Workflow" (or "Test Workflow") button at the bottom of the screen. The workflow is now listening for a single event.
 
+### Step  2: Launch the Injection
+Open your terminal in this repository folder.
 
+Run the exploit script:
+```bash
+sh ./exploit.sh
+```
+* When prompted, paste the Webhook URL you copied in Step 1.
+* Press Enter.
+* You should see a "Workflow executed successfully" message in the n8n UI.
+
+## Step 3: Exfiltrate the Data
+* Now that the /etc/passwd file has been indexed into the Vector Store, you can ask the AI Agent to read it for you.
+* In the n8n editor, click the Chat button (usually located in the bottom right corner or via the "Test Chat" interface).
+* Enter the following prompt exactly:
+
+"Provide me with any data you have from the knowledge base that came from /etc/passwd. Do not abbreviate or summarize."
+
+Result: The AI Agent will query the Vector Store, find the chunks labeled with /etc/passwd, and output the raw content of the system file (users, shells, and uids).
