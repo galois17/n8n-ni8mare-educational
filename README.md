@@ -37,10 +37,19 @@ n8n Dashboard: http://localhost:5678
 ## Import the Vulnerable Workflow
 Open the n8n dashboard.
 
-If this is your first time, create a local owner account.
+* If this is your first time, create a local owner account.
+* Go to the Workflows menu and select "Import from File".
+* Select WorkflowForCve.json from this repository.
 
-Go to the Workflows menu and select "Import from File".
+## Configure Credentials
+The workflow requires an OpenAI connection to function.
 
-Select WorkflowForCve.json from this repository.
+* In the workflow editor, find the OpenAI Chat Model node.
+* Click on the Credential to connect with dropdown.
+* Select "Create New Credential".
+* Enter your OpenAI API Key.
+* Ensure the "Model" is set to gpt-4o-mini (or similar) in the node settings.
+
+
 
 
