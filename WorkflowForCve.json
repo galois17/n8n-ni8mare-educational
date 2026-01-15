@@ -1,0 +1,337 @@
+{
+  "name": "CveShare",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Contact Us",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "name",
+              "placeholder": "test"
+            },
+            {
+              "fieldLabel": "file",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "f0c73936-476d-47d7-bad2-ac63ecc4ec3d",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -780,
+        680
+      ],
+      "webhookId": "169b127b-e691-40cf-b7f3-8c936aef1792"
+    },
+    {
+      "parameters": {
+        "jsCode": "for (let i = 0; i < items.length; i++) {\n  if (!items[i].binary) continue;\n\n  const binaryKeys = Object.keys(items[i].binary);\n  if (binaryKeys.length === 0) continue;\n  \n  const binaryKey = binaryKeys[0]; // e.g., \"file\"\n  const binaryData = items[i].binary[binaryKey];\n\n  const supportedMimeTypes = ['text/plain', 'text/markdown', 'text/csv', 'application/json'];\n  \n  const isTextFile = supportedMimeTypes.includes(binaryData.mimeType) || \n                     (binaryData.fileExtension && ['txt', 'md', 'csv', 'json', 'yml'].includes(binaryData.fileExtension));\n\n  if (isTextFile) {\n    const buffer = await this.helpers.getBinaryDataBuffer(i, binaryKey);\n    let contentText = buffer.toString('utf8');\n    \n    const fileName = binaryData.fileName;\n    contentText = `Filename: ${fileName}\\n\\n${contentText}`;\n\n    items[i].json.content = contentText;\n    items[i].json.metadata = { source: fileName, type: binaryData.mimeType };\n  } else {\n    items[i].json.content = `[Binary File Skipped] Filename: ${binaryData.fileName}`;\n    items[i].json.metadata = { source: binaryData.fileName, type: binaryData.mimeType };\n  }\n}\n\nreturn items;"
+      },
+      "id": "82d1b030-9949-4ef6-b009-4e828f3abb09",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -520,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "45727e62-a9cb-4aaa-abf9-8196acf88721",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        -260,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "b82716ce-5047-489b-8afc-1e298c7c414b",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        500,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "4cf8df51-caf1-4ec9-88a5-ab3d5aa2c4ca",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "name": "vector_store_key3",
+        "topK": 10
+      },
+      "id": "0c3b7827-a187-491f-ba15-19095a14ecc0",
+      "name": "Vector Store Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        880,
+        760
+      ]
+    },
+    {
+      "parameters": {
+        "chunkSize": 500
+      },
+      "id": "1aa3a968-8727-4037-aae1-806f027dec63",
+      "name": "Token Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterTokenSplitter",
+      "typeVersion": 1,
+      "position": [
+        100,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "memoryKey": "vector_store_key3"
+      },
+      "id": "c5ff9433-c74a-4238-9308-29491f1e9746",
+      "name": "In-Memory Vector Store1",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1,
+      "position": [
+        620,
+        1060
+      ]
+    },
+    {
+      "parameters": {
+        "agent": "conversationalAgent",
+        "options": {}
+      },
+      "id": "37eae826-3ca3-40e7-9b94-dd444edd7a1a",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        640,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "id": "bce2e2f7-0bf7-4373-a2e0-ec65834f3d41",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        520
+      ],
+      "webhookId": "1a80beaa-bf30-4ba4-b6a7-3e1082d63565"
+    },
+    {
+      "parameters": {
+        "content": "## Load data to knowledge-base (the source)\n",
+        "height": 809.0029836540539,
+        "width": 1029.28227439178
+      },
+      "id": "8e05b0b1-1d20-4939-9e0b-b65e3e41d007",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -820,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## The sink to expose the results\n",
+        "height": 942.5218266453828,
+        "width": 877.1722000978602,
+        "color": 5
+      },
+      "id": "77b0c295-81c7-4d00-9a61-52a18fab64b5",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": "vector_store_key3",
+        "clearStore": true
+      },
+      "id": "0749ac2a-244e-4280-96a5-115bf4e7596b",
+      "name": "In-Memory Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n\n<html>\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>My HTML document</title>\n</head>\n<body>\n  <div class=\"container\">\n    <h1>This is an H1 heading</h1>\n    <h2>This is an H2 heading</h2>\n    <p>This is a paragraph</p>\n    <p>{{ JSON.stringify($json.content) }}</p>\n  </div>\n</body>\n</html>\n\n<style>\n.container {\n  background-color: #ffffff;\n  text-align: center;\n  padding: 16px;\n  border-radius: 8px;\n}\n\nh1 {\n  color: #ff6d5a;\n  font-size: 24px;\n  font-weight: bold;\n  padding: 8px;\n}\n\nh2 {\n  color: #909399;\n  font-size: 18px;\n  font-weight: bold;\n  padding: 8px;\n}\n</style>\n\n<script>\nconsole.log(\"Hello World!\");\n</script>"
+      },
+      "id": "3d18ee65-05d7-4a14-a830-963288bddd5d",
+      "name": "Check the payload",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -500,
+        1140
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "In-Memory Vector Store",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check the payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "In-Memory Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "In-Memory Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "In-Memory Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Token Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "In-Memory Vector Store1": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "39246f18-9ae5-4d24-ba24-d8760d9c37bf",
+  "id": "PrcmdauwRLq1YAkX",
+  "tags": []
+}
