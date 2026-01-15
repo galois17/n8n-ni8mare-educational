@@ -19,3 +19,37 @@ By manipulating the JSON payload sent to a Form Trigger, an attacker can trick t
 * Docker and Docker Compose installed.
 * An OpenAI API Key (for the AI Agent).
 * curl (installed on your host machine to run the exploit script).
+
+## Setup Instructions
+1. Start the Environment
+Spin up the vulnerable n8n instance pinned to the specific version for this lab.
+
+
+
+```bash
+docker compose up -d
+```
+
+Once the containers are running, navigate to:
+
+n8n Dashboard: http://localhost:5678
+
+## Import the Vulnerable Workflow
+Open the n8n dashboard.
+
+* If this is your first time, create a local owner account.
+* Go to the Workflows menu and select "Import from File".
+* Select WorkflowForCve.json from this repository.
+
+## Configure Credentials
+The workflow requires an OpenAI connection to function.
+
+* In the workflow editor, find the OpenAI Chat Model node.
+* Click on the Credential to connect with dropdown.
+* Select "Create New Credential".
+* Enter your OpenAI API Key.
+* Ensure the "Model" is set to gpt-4o-mini (or similar) in the node settings.
+
+
+
+
