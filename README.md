@@ -13,3 +13,9 @@ By manipulating the JSON payload sent to a Form Trigger, an attacker can trick t
 * Accepting a local server path (e.g., /etc/passwd) as if it were an uploaded file.
 * Indexing the content of that sensitive file into the Vector Database.
 * Retrieving the sensitive data via the AI Chat Interface.
+
+---
+## Prerequisites
+* Docker and Docker Compose installed.
+* An OpenAI API Key (for the AI Agent).
+* curl (installed on your host machine to run the exploit script).
